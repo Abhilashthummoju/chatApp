@@ -1,20 +1,19 @@
-from unittest.util import _MAX_LENGTH
-from django.db import models
-from django_resized import ResizedImageField
 from django.contrib.auth.models import User
+from django.db import models
+from django.utils import timezone
 
+class Interest(models.Model):
+    from_user = models.ForeignKey(User, related_name='sent_interests', on_delete=models.CASCADE)
+    to_user = models.ForeignKey(User, related_name='received_interests', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(default=timezone.now)
 
-class Room(models.Model):
-    name = models.CharField(max_length=255, blank=False)
-    password = models.CharField(max_length=255, blank=False)
-    def __str__(self):
-        return str(self.name)
+class ChatRoom(models.Model):
+    user1 = models.ForeignKey(User, related_name='chatrooms_user1', on_delete=models.CASCADE)
+    user2 = models.ForeignKey(User, related_name='chatrooms_user2', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(default=timezone.now)
 
-class Chat(models.Model):
-    room = models.ForeignKey(Room, on_delete=models.CASCADE, blank=False, related_name="room")
-    user = models.ForeignKey(User, on_delete=models.CASCADE, blank=False, related_name="chatUser")
-    message = models.TextField(blank=True)
-    image = ResizedImageField(force_format='WEBP', size=None,scale=0.5, quality=75, upload_to='images', blank=True, null=True)
-
-    # def __str__(self):
-    #     return str(self.room)
+class Message(models.Model):
+    room = models.ForeignKey(ChatRoom, related_name='messages', on_delete=models.CASCADE)
+    sender = models.ForeignKey(User, related_name='sent_messages', on_delete=models.CASCADE)
+    content = models.TextField()
+    created_at = models.DateTimeField(default=timezone.now)
